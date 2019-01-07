@@ -29,30 +29,42 @@
                                     <segue destination="95s-Gw-lVu" kind="show" id="AYL-yv-l1j"/>
                                 </connections>
                             </button>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="tokei" translatesAutoresizingMaskIntoConstraints="NO" id="70C-hK-XYa">
+                                <rect key="frame" x="16" y="237" width="234.5" height="125"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="125" id="gYj-n7-gMW"/>
+                                    <constraint firstAttribute="width" secondItem="70C-hK-XYa" secondAttribute="height" multiplier="375:200" id="iB4-ZF-gcg"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="70C-hK-XYa" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="6IY-wk-7Tn"/>
+                            <constraint firstItem="70C-hK-XYa" firstAttribute="top" secondItem="gni-dK-c1o" secondAttribute="bottom" constant="33" id="DDu-p9-Yce"/>
                             <constraint firstItem="gni-dK-c1o" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="100" id="a4Q-rS-2Pn"/>
                             <constraint firstItem="gni-dK-c1o" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="zXB-FH-pJ3"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <navigationItem key="navigationItem" id="DFI-EQ-f4a"/>
+                    <connections>
+                        <outlet property="tokeiImageView" destination="70C-hK-XYa" id="CBX-9t-6W9"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1072.8" y="133.5832083958021"/>
         </scene>
-        <!--View Controller-->
+        <!--Second View Controller-->
         <scene sceneID="a8H-s7-bNg">
             <objects>
-                <viewController id="95s-Gw-lVu" customClass="ViewController" customModule="TransitionAnimationSample" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="95s-Gw-lVu" customClass="SecondViewController" customModule="TransitionAnimationSample" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="gL7-bl-Zlq">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1ox-kA-V9v">
-                                <rect key="frame" x="112.5" y="164" width="150" height="50"/>
+                                <rect key="frame" x="112.5" y="364" width="150" height="50"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="50" id="61c-AZ-maF"/>
                                     <constraint firstAttribute="width" constant="150" id="Ztq-Un-j1V"/>
@@ -62,14 +74,26 @@
                                     <segue destination="yKF-HL-wwI" kind="show" id="JtV-wn-rhG"/>
                                 </connections>
                             </button>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="tokei" translatesAutoresizingMaskIntoConstraints="NO" id="wSe-Y2-eSY">
+                                <rect key="frame" x="0.0" y="84" width="375" height="200"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="Ztm-ay-90i"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" red="0.063481707129999995" green="1" blue="0.9062076" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="1ox-kA-V9v" firstAttribute="top" secondItem="mCk-Bl-nrj" secondAttribute="top" constant="100" id="lDD-w5-QiF"/>
+                            <constraint firstItem="wSe-Y2-eSY" firstAttribute="leading" secondItem="mCk-Bl-nrj" secondAttribute="leading" id="4DP-KZ-abb"/>
+                            <constraint firstItem="wSe-Y2-eSY" firstAttribute="trailing" secondItem="mCk-Bl-nrj" secondAttribute="trailing" id="6Yg-kN-Ehl"/>
+                            <constraint firstItem="wSe-Y2-eSY" firstAttribute="top" secondItem="mCk-Bl-nrj" secondAttribute="top" constant="20" id="jcv-UP-4h6"/>
+                            <constraint firstItem="1ox-kA-V9v" firstAttribute="top" secondItem="mCk-Bl-nrj" secondAttribute="top" constant="300" id="lDD-w5-QiF"/>
                             <constraint firstItem="1ox-kA-V9v" firstAttribute="centerX" secondItem="gL7-bl-Zlq" secondAttribute="centerX" id="qzq-aI-Krh"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="mCk-Bl-nrj"/>
                     </view>
+                    <connections>
+                        <outlet property="hogeImageView" destination="wSe-Y2-eSY" id="Zvh-9F-Keb"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EWH-xJ-0Hg" sceneMemberID="firstResponder"/>
             </objects>
@@ -78,7 +102,7 @@
         <!--View Controller-->
         <scene sceneID="ml0-zy-3d9">
             <objects>
-                <viewController id="yKF-HL-wwI" customClass="ViewController" customModule="TransitionAnimationSample" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="yKF-HL-wwI" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="aTG-Qr-EwV">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -109,4 +133,7 @@
             <point key="canvasLocation" x="161" y="134"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="tokei" width="583" height="583"/>
+    </resources>
 </document>
