@@ -71,7 +71,7 @@
                                 </constraints>
                                 <state key="normal" title="Button"/>
                                 <connections>
-                                    <segue destination="yKF-HL-wwI" kind="show" id="JtV-wn-rhG"/>
+                                    <action selector="tappedButton:" destination="95s-Gw-lVu" eventType="touchUpInside" id="WSC-n6-bZh"/>
                                 </connections>
                             </button>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="tokei" translatesAutoresizingMaskIntoConstraints="NO" id="wSe-Y2-eSY">
@@ -93,6 +93,7 @@
                     </view>
                     <connections>
                         <outlet property="hogeImageView" destination="wSe-Y2-eSY" id="Zvh-9F-Keb"/>
+                        <segue destination="yKF-HL-wwI" kind="show" identifier="push" id="yPf-bD-OFx"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EWH-xJ-0Hg" sceneMemberID="firstResponder"/>

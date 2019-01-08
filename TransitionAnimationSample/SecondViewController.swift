@@ -19,9 +19,44 @@ class SecondViewController: UIViewController {
 //        self.view.alpha = 0
         // Do any additional setup after loading the view.
     }
+    
+    @IBAction func tappedButton(_ sender: Any) {
+        self.performSegue(withIdentifier: "push", sender: nil)
+    }
+    
 }
 
-extension SecondViewController: TransitioinAnimationTargetViewControllerProtocol {
+extension SecondViewController: TransitioinAnimationTargetPushToViewControllerProtocol {
+    var targetViewPushTo: UIView {
+        return hogeImageView
+    }
+    
+    func animationStartInPushTo() {
+        
+    }
+    
+    func animationEndedInPushTo() {
+        
+    }
+    
+    
+}
+
+extension SecondViewController: TransitioinAnimationTargetPopFromViewControllerProtocol {
+    var targetViewPopFrom: UIView {
+        return hogeImageView
+    }
+    
+    func animationStartInPopFrom() {
+    }
+    
+    func animationEndedInPopFrom() {
+    }
+    
+    var shouldBeginGesture: Bool {
+        return true
+    }
+    
     func clearBack() {
         self.view.backgroundColor = self.view.backgroundColor?.withAlphaComponent(0)
     }
@@ -30,7 +65,5 @@ extension SecondViewController: TransitioinAnimationTargetViewControllerProtocol
         self.view.backgroundColor = self.view.backgroundColor?.withAlphaComponent(1)
     }
     
-    var targetView: UIView {
-        return hogeImageView
-    }
 }
+

@@ -20,8 +20,10 @@ class CustomPrecentDrivenInteractiveTransition: UIPercentDrivenInteractiveTransi
 
     var fromView:UIView?
     var toView:UIView?
-    var fromVCProtocol:TransitioinAnimationTargetViewControllerProtocol?
-    var toVCProtocol:TransitioinAnimationTargetViewControllerProtocol?
+    var pushFromVCProtocol:TransitioinAnimationTargetPushFromViewControllerProtocol?
+    var pushToVCProtocol:TransitioinAnimationTargetPushToViewControllerProtocol?
+    var popFromVCProtocol:TransitioinAnimationTargetPopFromViewControllerProtocol?
+    var popToVCProtocol:TransitioinAnimationTargetPopToViewControllerProtocol?
     
     var pan:Bool = false
     
@@ -44,8 +46,6 @@ class CustomPrecentDrivenInteractiveTransition: UIPercentDrivenInteractiveTransi
             return
         }
         
-//        var percent = gesture.location(in: view).y / view.bounds.height / 1.5
-//        percent = (percent < 1.0) ? percent : 0.99
         percentageDriven = true
         
         switch gesture.state {
@@ -55,22 +55,30 @@ class CustomPrecentDrivenInteractiveTransition: UIPercentDrivenInteractiveTransi
             }
             pan = true
         case .changed:
+            guard let popFromVCProtocol = self.popFromVCProtocol else {
+                return
+            }
+            guard let popToVCProtocol = self.popToVCProtocol else {
+                return
+            }
+
             // 適当なスケール
-            let scaleW:CGFloat = toVCProtocol!.targetView.frame.width / fromVCProtocol!.targetView.frame.width
-            let scaleH:CGFloat = toVCProtocol!.targetView.frame.height / fromVCProtocol!.targetView.frame.height
+            let scaleW:CGFloat = popToVCProtocol.targetViewPopTo.frame.width / popFromVCProtocol.targetViewPopFrom.frame.width
+            let scaleH:CGFloat = popToVCProtocol.targetViewPopTo.frame.height / popFromVCProtocol.targetViewPopFrom.frame.height
             let progress:CGFloat = min(1.0, (500 - (gesture.translation(in: view).y - 50) )/500)
             let progressRev:CGFloat = 1 - progress
             print("scale \(scaleW) \(scaleH)")
             print(progressRev)
                                        
             fromView?.transform = CGAffineTransform(translationX: gesture.translation(in: view).x, y: gesture.translation(in: view).y * 0.8)
-            fromVCProtocol?.targetView.transform = CGAffineTransform(scaleX: 1 - (1 - scaleW) * progressRev, y: 1 - (1 - scaleH) * progressRev)
+            popFromVCProtocol.targetViewPopFrom.transform = CGAffineTransform(scaleX: 1 - (1 - scaleW) * progressRev, y: 1 - (1 - scaleH) * progressRev)
             
             fromView?.backgroundColor = fromView?.backgroundColor?.withAlphaComponent(1.0 - gesture.translation(in: view).y * 0.01)
             
             // 遷移アニメーションを奪うためにこのようにおく
             // 感覚的には0やpercentとしたいが、transformが打ち消し方向に動く問題が生じたため0.999とする（より良い方法があるかもしれません）
             self.update(0.999)
+            
         case .ended, .cancelled:
             
             if (gesture.translation(in: view).y < 100) {
@@ -144,12 +152,6 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
         guard let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) else {
             return
         }
-        guard let fromVCProtocol = fromVC as? TransitioinAnimationTargetViewControllerProtocol else {
-            return
-        }
-        guard let toVCProtocol = toVC as? TransitioinAnimationTargetViewControllerProtocol else {
-            return
-        }
 
         let toView:UIView! = toVC.view
         let fromView:UIView! = fromVC.view
@@ -157,6 +159,16 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
         if isPop {
             // from :今の画面
             // to :戻った画面
+            
+            guard let popFromVCProtocol = fromVC as? TransitioinAnimationTargetPopFromViewControllerProtocol else {
+                return
+            }
+            guard let popToVCProtocol = toVC as? TransitioinAnimationTargetPopToViewControllerProtocol else {
+                return
+            }
+            
+            popFromVCProtocol.animationStartInPopFrom()
+            popToVCProtocol.animationStartInPopTo()
             
             containerView.insertSubview(toVC.view, aboveSubview: fromVC.view)
             containerView.insertSubview(toVC.view, belowSubview: fromVC.view)
@@ -166,8 +178,8 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
 
             self.fromView = fromView
             self.toView = toView
-            self.fromVCProtocol = fromVCProtocol
-            self.toVCProtocol = toVCProtocol
+            self.popFromVCProtocol = popFromVCProtocol
+            self.popToVCProtocol = popToVCProtocol
 
             toView.frame = containerView.frame
             toView.transform = CGAffineTransform.identity
@@ -175,7 +187,7 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
             let animationDuration = transitionDuration(using: transitionContext)
 
             if !pan {
-                fromVCProtocol.clearBack()
+                popFromVCProtocol.clearBack()
             }
             
             UIView.setAnimationCurve(.easeOut)
@@ -187,14 +199,12 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
                             
                             // 画面自体を移動し、ターゲットViewを拡縮する
                             // （両方を画面に適用した場合、不本意な挙動をしたため）
-                            fromView.transform = self.transformBackFromVC(fromTargetView: fromVCProtocol.targetView,
-                                                                          toTargetView: toVCProtocol.targetView,
+                            fromView.transform = self.transformBackFromVC(fromTargetView: popFromVCProtocol.targetViewPopFrom,
+                                                                          toTargetView: popToVCProtocol.targetViewPopTo,
                                                                           fromVCView: fromView,
                                                                           toVCView: toView)
-                            fromVCProtocol.targetView.transform = self.transformBackTargetView(fromTargetView: fromVCProtocol.targetView, toTargetView: toVCProtocol.targetView)
-                            
-//                            fromView.backgroundColor = fromView.backgroundColor?.withAlphaComponent(0)
-                            
+                            popFromVCProtocol.targetViewPopFrom.transform = self.transformBackTargetView(fromTargetView: popFromVCProtocol.targetViewPopFrom,
+                                                                                                         toTargetView: popToVCProtocol.targetViewPopTo)
                             
             }) { (finished) in
                 
@@ -209,6 +219,16 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
             // from :今の画面
             // to :進む画面
             
+            guard let pushFromVCProtocol = fromVC as? TransitioinAnimationTargetPushFromViewControllerProtocol else {
+                return
+            }
+            guard let pushToVCProtocol = toVC as? TransitioinAnimationTargetPushToViewControllerProtocol else {
+                return
+            }
+            
+            pushToVCProtocol.animationStartInPushTo()
+            pushToVCProtocol.animationStartInPushTo()
+            
             containerView.insertSubview(toVC.view, aboveSubview: fromVC.view)
             
             toView.frame = containerView.frame
@@ -219,11 +239,11 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
             
             self.fromView = fromView
             self.toView = toView
-            self.fromVCProtocol = fromVCProtocol
-            self.toVCProtocol = toVCProtocol
+            self.pushFromVCProtocol = pushFromVCProtocol
+            self.pushToVCProtocol = pushToVCProtocol
             
+            // 実際は0秒
             let animationDuration = transitionDuration(using: transitionContext)
-
             UIView.animate(withDuration: animationDuration,
                            animations: {
                             toView.transform = CGAffineTransform.identity
@@ -241,19 +261,21 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
     
     func animationEnded(_ transitionCompleted: Bool) {
         if isPop {
-            self.fromVCProtocol?.resetBack()
-            self.toVCProtocol?.popAnimationEnded()
+            self.popFromVCProtocol?.resetBack()
+            self.popFromVCProtocol?.animationEndedInPopFrom()
+            self.popToVCProtocol?.animationEndedInPopTo()
         }
         else {
-            if let targetView = self.toVCProtocol?.targetView {
-                targetView.transform = self.transformForwaradTargetView(fromTargetView: fromVCProtocol!.targetView, toTargetView: toVCProtocol!.targetView, fromVCView: fromView!, toVCView: toView!)
+            if let targetView = self.pushToVCProtocol?.targetViewPushTo {
+                targetView.transform = self.transformForwaradTargetView(fromTargetView: self.pushFromVCProtocol!.targetViewPushFrom, toTargetView: self.pushToVCProtocol!.targetViewPushTo, fromVCView: fromView!, toVCView: toView!)
                 
                 UIView.setAnimationCurve(.easeOut)
                 
                 UIView.animate(withDuration: 0.3, animations: {
                     targetView.transform = CGAffineTransform.identity
                 }, completion: { (finished) in
-                    self.toVCProtocol?.pushAnimationEnded()
+                    self.pushToVCProtocol?.animationEndedInPushTo()
+                    self.pushFromVCProtocol?.animationEndedInPushFro()
                 })
             }
         }
@@ -295,13 +317,33 @@ extension CustomPrecentDrivenInteractiveTransition {
     }
 }
 
-protocol TransitioinAnimationTargetViewControllerProtocol {
-    var targetView:UIView { get }
-    
+// 戻る,今の画面
+protocol TransitioinAnimationTargetPopFromViewControllerProtocol {
+    var targetViewPopFrom:UIView { get }
+    func animationStartInPopFrom()
+    func animationEndedInPopFrom()
+
+    var shouldBeginGesture:Bool { get }
     func clearBack()
     func resetBack()
-    func pushAnimationEnded()
-    func popAnimationEnded()
+}
+// 戻る,前の画面
+protocol TransitioinAnimationTargetPopToViewControllerProtocol {
+    var targetViewPopTo:UIView { get }
+    func animationStartInPopTo()
+    func animationEndedInPopTo()
+}
+// 進む,今の画面
+protocol TransitioinAnimationTargetPushFromViewControllerProtocol {
+    var targetViewPushFrom:UIView { get }
+    func animationStartInPushFro()
+    func animationEndedInPushFro()
+}
+// 進む,前の画面
+protocol TransitioinAnimationTargetPushToViewControllerProtocol {
+    var targetViewPushTo:UIView { get }
+    func animationStartInPushTo()
+    func animationEndedInPushTo()
 }
 
 extension CGRect {

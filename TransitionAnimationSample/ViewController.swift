@@ -16,15 +16,32 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController: TransitioinAnimationTargetViewControllerProtocol {
-    func clearBack() {
-    }
-    
-    func resetBack() {
-    }
-    
-    var targetView: UIView {
+extension ViewController: TransitioinAnimationTargetPushFromViewControllerProtocol {
+    var targetViewPushFrom: UIView {
         return tokeiImageView
+    }
+    
+    func animationStartInPushFro() {
+        targetViewPushFrom.isHidden = true
+    }
+    
+    func animationEndedInPushFro() {
+        targetViewPushFrom.isHidden = false
+    }
+    
+}
+
+extension ViewController: TransitioinAnimationTargetPopToViewControllerProtocol {
+    var targetViewPopTo: UIView {
+        return tokeiImageView
+    }
+    
+    func animationStartInPopTo() {
+        targetViewPushFrom.isHidden = true
+    }
+    
+    func animationEndedInPopTo() {
+        targetViewPushFrom.isHidden = false
     }
 }
 

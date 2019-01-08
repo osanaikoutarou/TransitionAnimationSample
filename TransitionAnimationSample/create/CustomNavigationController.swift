@@ -17,7 +17,19 @@ class CustomNavigationController: UINavigationController {
         
         animator = CustomPrecentDrivenInteractiveTransition(view: self.view)
         animator!.shouldBeginGesture = { (gesture) in
-            return self.viewControllers.count > 1
+            guard let delegate = self.delegate else {
+                return false
+            }
+            if !(delegate is CustomPrecentDrivenInteractiveTransition) {
+                return false
+            }
+            if (self.viewControllers.count <= 1) {
+                return false
+            }
+            guard let lastVCprotocol = self.viewControllers.last as? TransitioinAnimationTargetPopFromViewControllerProtocol else {
+                return false
+            }
+            return lastVCprotocol.shouldBeginGesture
         }
         animator!.popViewController = {
             self.popViewController(animated: true)
@@ -27,16 +39,4 @@ class CustomNavigationController: UINavigationController {
 
         // Do any additional setup after loading the view.
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
