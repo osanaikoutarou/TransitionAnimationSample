@@ -157,15 +157,16 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
                            animations: {
                             
                             toView.transform = CGAffineTransform.identity
-                            fromView.transform = self.calcTransform3(fromTargetView: fromVCProtocol.targetView,
-                                                                     toTargetView: toVCProtocol.targetView,
-                                                                     fromVCView: fromView,
-                                                                     toVCView: toView)
                             
-                            fromVCProtocol.targetView.transform = self.calcTransform2(fromTargetView: fromVCProtocol.targetView,
-                                                                                      toTargetView: toVCProtocol.targetView,
-                                                                                      fromVCView: fromView,
-                                                                                      toVCView: toView)
+                            // 画面自体を移動し、ターゲットViewを拡縮する
+                            // （両方を画面に適用した場合、不本意な挙動をしたため）
+                            fromView.transform = self.transformBackFromVC(fromTargetView: fromVCProtocol.targetView,
+                                                                          toTargetView: toVCProtocol.targetView,
+                                                                          fromVCView: fromView,
+                                                                          toVCView: toView)
+                            fromVCProtocol.targetView.transform = self.transformBackTargetView(fromTargetView: fromVCProtocol.targetView, toTargetView: toVCProtocol.targetView)
+                                                                                      
+                            
                             
             }) { (finished) in
                 
@@ -206,94 +207,19 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
         print("🙂ENDED")
     }
     
-    func calcTransform(fromTargetView:UIView, toTargetView:UIView, fromVCView:UIView, toVCView:UIView) -> CGAffineTransform {
-        // imageViewのframe
-        let toTargetFrame   = toVCView.convert(toTargetView.frame, to: toVCView)
-        let fromTargetFrame = fromVCView.convert(fromTargetView.frame, to: fromVCView)
-        
-        // 縮小後のTargetのFrame
-        // アンカーがcenterなので、(center + 差 * スケール)となる
-        let scaleX = toTargetFrame.width/fromTargetFrame.width
-        let scaleY = toTargetFrame.height/fromTargetFrame.height
-        let fromTargetFrameSaled = CGRect(x: fromVCView.center.x + (fromTargetFrame.origin.x - fromVCView.center.x) * scaleX,
-                                          y: fromVCView.center.y + (fromTargetFrame.origin.y - fromVCView.center.y) * scaleY,
-                                          width: toTargetFrame.width,
-                                          height: toTargetFrame.height)
-        
-//        print("scaleX\(scaleX) scaleY\(scaleY)")
-//
-        
-//        return CGAffineTransform(a: 1, b: 0, c: 0, d: 1, tx: toTargetFrame.center.x - fromTargetFrame.center.x, ty: toTargetFrame.center.y - fromTargetFrame.center.y)
-        return CGAffineTransform(a: scaleX,
-                                 b: 0,
-                                 c: 0,
-                                 d: scaleY,
-                                 tx: toTargetFrame.center.x - fromTargetFrameSaled.center.x,
-                                 ty: toTargetFrame.center.y - fromTargetFrameSaled.center.y)
-        
-        
+    // 拡大のみ
+    func transformBackTargetView(fromTargetView:UIView, toTargetView:UIView) -> CGAffineTransform {
+        return CGAffineTransform(scaleX: toTargetView.frame.width/fromTargetView.frame.width,
+                                 y: toTargetView.frame.height/fromTargetView.frame.height)
     }
-    
-    func calcTransform2(fromTargetView:UIView, toTargetView:UIView, fromVCView:UIView, toVCView:UIView) -> CGAffineTransform {
+    // 移動のみ
+    func transformBackFromVC(fromTargetView:UIView, toTargetView:UIView, fromVCView:UIView, toVCView:UIView) -> CGAffineTransform {
         // imageViewのframe
         let toTargetFrame   = toVCView.convert(toTargetView.frame, to: toVCView)
         let fromTargetFrame = fromVCView.convert(fromTargetView.frame, to: toVCView)
-        
-        // 縮小後のTargetのFrame
-        // アンカーがcenterなので、(center + 差 * スケール)となる
-        let scaleX = toTargetFrame.width/fromTargetFrame.width
-        let scaleY = toTargetFrame.height/fromTargetFrame.height
-//        let fromTargetFrameSaled = CGRect(x: fromVCView.center.x + (fromTargetFrame.origin.x - fromVCView.center.x) * scaleX,
-//                                          y: fromVCView.center.y + (fromTargetFrame.origin.y - fromVCView.center.y) * scaleY,
-//                                          width: toTargetFrame.width,
-//                                          height: toTargetFrame.height)
-        
-        //        print("scaleX\(scaleX) scaleY\(scaleY)")
-        //
-        
-        //        return CGAffineTransform(a: 1, b: 0, c: 0, d: 1, tx: toTargetFrame.center.x - fromTargetFrame.center.x, ty: toTargetFrame.center.y - fromTargetFrame.center.y)
-//        return CGAffineTransform(a: scaleX,
-//                                 b: 0,
-//                                 c: 0,
-//                                 d: scaleY,
-//                                 tx: toTargetFrame.center.x - fromTargetFrame.center.x,
-//                                 ty: toTargetFrame.center.y - fromTargetFrame.center.y)
-        return CGAffineTransform(a: scaleX,
-                                 b: 0,
-                                 c: 0,
-                                 d: scaleY,
-                                 tx: 0,
-                                 ty: 0)
 
-        
-    }
-    
-    func calcTransform3(fromTargetView:UIView, toTargetView:UIView, fromVCView:UIView, toVCView:UIView) -> CGAffineTransform {
-        // imageViewのframe
-        let toTargetFrame   = toVCView.convert(toTargetView.frame, to: toVCView)
-        let fromTargetFrame = fromVCView.convert(fromTargetView.frame, to: fromVCView)
-        
-        // 縮小後のTargetのFrame
-        // アンカーがcenterなので、(center + 差 * スケール)となる
-        let scaleX = toTargetFrame.width/fromTargetFrame.width
-        let scaleY = toTargetFrame.height/fromTargetFrame.height
-        let fromTargetFrameSaled = CGRect(x: fromVCView.center.x + (fromTargetFrame.origin.x - fromVCView.center.x) * scaleX,
-                                          y: fromVCView.center.y + (fromTargetFrame.origin.y - fromVCView.center.y) * scaleY,
-                                          width: toTargetFrame.width,
-                                          height: toTargetFrame.height)
-        
-        //        print("scaleX\(scaleX) scaleY\(scaleY)")
-        //
-        
-        //        return CGAffineTransform(a: 1, b: 0, c: 0, d: 1, tx: toTargetFrame.center.x - fromTargetFrame.center.x, ty: toTargetFrame.center.y - fromTargetFrame.center.y)
-        return CGAffineTransform(a: 1,
-                                 b: 0,
-                                 c: 0,
-                                 d: 1,
-                                 tx: toTargetFrame.center.x - fromTargetFrame.center.x,
-                                 ty: toTargetFrame.center.y - fromTargetFrame.center.y)
-        
-        
+        return CGAffineTransform(translationX: toTargetFrame.center.x - fromTargetFrame.center.x,
+                                 y: toTargetFrame.center.y - fromTargetFrame.center.y)
     }
     
 }
