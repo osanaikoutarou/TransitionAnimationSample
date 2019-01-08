@@ -30,7 +30,7 @@
                                 </connections>
                             </button>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="tokei" translatesAutoresizingMaskIntoConstraints="NO" id="70C-hK-XYa">
-                                <rect key="frame" x="16" y="237" width="234.5" height="125"/>
+                                <rect key="frame" x="16" y="204" width="234.5" height="125"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="125" id="gYj-n7-gMW"/>
                                     <constraint firstAttribute="width" secondItem="70C-hK-XYa" secondAttribute="height" multiplier="375:200" id="iB4-ZF-gcg"/>
@@ -40,7 +40,7 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="70C-hK-XYa" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="6IY-wk-7Tn"/>
-                            <constraint firstItem="70C-hK-XYa" firstAttribute="top" secondItem="gni-dK-c1o" secondAttribute="bottom" constant="33" id="DDu-p9-Yce"/>
+                            <constraint firstItem="70C-hK-XYa" firstAttribute="top" secondItem="gni-dK-c1o" secondAttribute="bottom" id="DDu-p9-Yce"/>
                             <constraint firstItem="gni-dK-c1o" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="100" id="a4Q-rS-2Pn"/>
                             <constraint firstItem="gni-dK-c1o" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="zXB-FH-pJ3"/>
                         </constraints>

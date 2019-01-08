@@ -16,8 +16,8 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController: HogeProtocol {
-    var targetImageView: UIImageView {
+extension ViewController: TransitioinAnimationTargetViewControllerProtocol {
+    var targetView: UIView {
         return tokeiImageView
     }
 }
