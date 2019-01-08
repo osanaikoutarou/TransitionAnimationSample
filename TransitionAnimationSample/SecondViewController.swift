@@ -15,13 +15,21 @@ class SecondViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.view.backgroundColor = UIColor(red: 0, green: 1, blue: 1, alpha: 0.5)
+//        self.view.backgroundColor = UIColor(red: 0, green: 1, blue: 1, alpha: 0.5)
 //        self.view.alpha = 0
         // Do any additional setup after loading the view.
     }
 }
 
 extension SecondViewController: TransitioinAnimationTargetViewControllerProtocol {
+    func clearBack() {
+        self.view.backgroundColor = self.view.backgroundColor?.withAlphaComponent(0)
+    }
+    
+    func resetBack() {
+        self.view.backgroundColor = self.view.backgroundColor?.withAlphaComponent(1)
+    }
+    
     var targetView: UIView {
         return hogeImageView
     }

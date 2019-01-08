@@ -23,6 +23,8 @@ class CustomPrecentDrivenInteractiveTransition: UIPercentDrivenInteractiveTransi
     var fromVCProtocol:TransitioinAnimationTargetViewControllerProtocol?
     var toVCProtocol:TransitioinAnimationTargetViewControllerProtocol?
     
+    var pan:Bool = false
+    
     init(view:UIView) {
         super.init()
         setup(view: view)
@@ -49,14 +51,22 @@ class CustomPrecentDrivenInteractiveTransition: UIPercentDrivenInteractiveTransi
         switch gesture.state {
         case .began:
             if let popViewController = self.popViewController {
-                
                 popViewController()
             }
+            pan = true
         case .changed:
             // 適当なスケール
-            let scale:CGFloat = (1000 - gesture.translation(in: view).y)/1000
+            let scaleW:CGFloat = toVCProtocol!.targetView.frame.width / fromVCProtocol!.targetView.frame.width
+            let scaleH:CGFloat = toVCProtocol!.targetView.frame.height / fromVCProtocol!.targetView.frame.height
+            let progress:CGFloat = min(1.0, (500 - (gesture.translation(in: view).y - 50) )/500)
+            let progressRev:CGFloat = 1 - progress
+            print("scale \(scaleW) \(scaleH)")
+            print(progressRev)
+                                       
             fromView?.transform = CGAffineTransform(translationX: gesture.translation(in: view).x, y: gesture.translation(in: view).y * 0.8)
-            fromVCProtocol?.targetView.transform = CGAffineTransform(scaleX: scale, y: scale)
+            fromVCProtocol?.targetView.transform = CGAffineTransform(scaleX: 1 - (1 - scaleW) * progressRev, y: 1 - (1 - scaleH) * progressRev)
+            
+            fromView?.backgroundColor = fromView?.backgroundColor?.withAlphaComponent(1.0 - gesture.translation(in: view).y * 0.01)
             
             // 遷移アニメーションを奪うためにこのようにおく
             // 感覚的には0やpercentとしたいが、transformが打ち消し方向に動く問題が生じたため0.999とする（より良い方法があるかもしれません）
@@ -73,10 +83,16 @@ class CustomPrecentDrivenInteractiveTransition: UIPercentDrivenInteractiveTransi
             }
             
             percentageDriven = false
+            pan = false
             
         default:
             break
         }
+    }
+    
+    func finish(doSomething:((_ withPanGesture:Bool) -> Void)) {
+        doSomething(pan)
+        finish()
     }
     
     
@@ -111,7 +127,12 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
     
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         // アニメーション時間
-        return 1.5 * 1
+        if isPop {
+            return 0.4
+        }
+        else {
+            return 0
+        }
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
@@ -152,6 +173,10 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
             toView.transform = CGAffineTransform.identity
             
             let animationDuration = transitionDuration(using: transitionContext)
+
+            if !pan {
+                fromVCProtocol.clearBack()
+            }
             
             UIView.animate(withDuration: animationDuration,
                            animations: {
@@ -165,7 +190,8 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
                                                                           fromVCView: fromView,
                                                                           toVCView: toView)
                             fromVCProtocol.targetView.transform = self.transformBackTargetView(fromTargetView: fromVCProtocol.targetView, toTargetView: toVCProtocol.targetView)
-                                                                                      
+                            
+//                            fromView.backgroundColor = fromView.backgroundColor?.withAlphaComponent(0)
                             
                             
             }) { (finished) in
@@ -178,6 +204,9 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
 
         }
         else {
+            // from :今の画面
+            // to :進む画面
+            
             containerView.insertSubview(toVC.view, aboveSubview: fromVC.view)
             
             toView.frame = containerView.frame
@@ -185,6 +214,11 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
             
             fromView.frame = containerView.frame
             fromView.transform = CGAffineTransform.identity
+            
+            self.fromView = fromView
+            self.toView = toView
+            self.fromVCProtocol = fromVCProtocol
+            self.toVCProtocol = toVCProtocol
             
             let animationDuration = transitionDuration(using: transitionContext)
 
@@ -204,28 +238,75 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
     }
     
     func animationEnded(_ transitionCompleted: Bool) {
-        print("🙂ENDED")
+        print("🙂ENDED  \(transitionCompleted)")
+        if isPop {
+            fromVCProtocol?.resetBack()
+        }
+        else {
+            if let targetView = self.toVCProtocol?.targetView {
+                targetView.transform = self.transformForwaradTargetView2(fromTargetView: fromVCProtocol!.targetView, toTargetView: toVCProtocol!.targetView, fromVCView: fromView!, toVCView: toView!)
+                
+                UIView.animate(withDuration: 0.3, animations: {
+                    targetView.transform = CGAffineTransform.identity
+                }, completion: { (finished) in
+                    
+                })
+            }
+        }
     }
     
-    // 拡大のみ
+    
+}
+
+// 進む遷移のときのtransform
+extension CustomPrecentDrivenInteractiveTransition {
+    // 拡大と移動 ターゲットView
+    func transformForwaradTargetView(fromTargetView:UIView, toTargetView:UIView, fromVCView:UIView, toVCView:UIView) -> CGAffineTransform {
+        let toTargetFrame = toVCView.convert(toTargetView.frame, to: toVCView)
+        let fromTargetFrame = fromVCView.convert(fromTargetView.frame, to: toVCView)
+
+        let scaleX = toTargetFrame.width/fromTargetFrame.width
+        let scaleY = toTargetFrame.height/fromTargetFrame.height
+        
+        return CGAffineTransform(a: scaleX, b: 0, c: 0, d: scaleY, tx: toTargetFrame.center.x - fromTargetFrame.center.x, ty: toTargetFrame.center.y - fromTargetFrame.center.y)
+    }
+    
+    // 拡大と移動 ターゲットView
+    func transformForwaradTargetView2(fromTargetView:UIView, toTargetView:UIView, fromVCView:UIView, toVCView:UIView) -> CGAffineTransform {
+        let toTargetFrame = toVCView.convert(toTargetView.frame, to: toVCView)
+        let fromTargetFrame = fromVCView.convert(fromTargetView.frame, to: toVCView)
+        
+        let scaleX = fromTargetFrame.width/toTargetFrame.width
+        let scaleY = fromTargetFrame.height/toTargetFrame.height
+        
+        return CGAffineTransform(a: scaleX, b: 0, c: 0, d: scaleY, tx: fromTargetFrame.center.x - toTargetFrame.center.x, ty: fromTargetFrame.center.y - toTargetFrame.center.y)
+    }
+    
+    
+}
+// 戻る遷移のときのtransform
+extension CustomPrecentDrivenInteractiveTransition {
+    // 拡大のみ ターゲットView
     func transformBackTargetView(fromTargetView:UIView, toTargetView:UIView) -> CGAffineTransform {
         return CGAffineTransform(scaleX: toTargetView.frame.width/fromTargetView.frame.width,
                                  y: toTargetView.frame.height/fromTargetView.frame.height)
     }
-    // 移動のみ
+    // 移動のみ 画面
     func transformBackFromVC(fromTargetView:UIView, toTargetView:UIView, fromVCView:UIView, toVCView:UIView) -> CGAffineTransform {
         // imageViewのframe
         let toTargetFrame   = toVCView.convert(toTargetView.frame, to: toVCView)
         let fromTargetFrame = fromVCView.convert(fromTargetView.frame, to: toVCView)
-
+        
         return CGAffineTransform(translationX: toTargetFrame.center.x - fromTargetFrame.center.x,
                                  y: toTargetFrame.center.y - fromTargetFrame.center.y)
     }
-    
 }
 
 protocol TransitioinAnimationTargetViewControllerProtocol {
     var targetView:UIView { get }
+    
+    func clearBack()
+    func resetBack()
 }
 
 extension CGRect {
@@ -233,3 +314,5 @@ extension CGRect {
         return CGPoint(x: origin.x + width/2.0, y: origin.y + height/2.0)
     }
 }
+
+

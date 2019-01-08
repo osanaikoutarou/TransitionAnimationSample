@@ -17,6 +17,12 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: TransitioinAnimationTargetViewControllerProtocol {
+    func clearBack() {
+    }
+    
+    func resetBack() {
+    }
+    
     var targetView: UIView {
         return tokeiImageView
     }
