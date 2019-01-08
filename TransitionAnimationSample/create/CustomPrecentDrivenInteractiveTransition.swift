@@ -178,6 +178,8 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
                 fromVCProtocol.clearBack()
             }
             
+            UIView.setAnimationCurve(.easeOut)
+            
             UIView.animate(withDuration: animationDuration,
                            animations: {
                             
@@ -238,18 +240,20 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
     }
     
     func animationEnded(_ transitionCompleted: Bool) {
-        print("🙂ENDED  \(transitionCompleted)")
         if isPop {
-            fromVCProtocol?.resetBack()
+            self.fromVCProtocol?.resetBack()
+            self.toVCProtocol?.popAnimationEnded()
         }
         else {
             if let targetView = self.toVCProtocol?.targetView {
-                targetView.transform = self.transformForwaradTargetView2(fromTargetView: fromVCProtocol!.targetView, toTargetView: toVCProtocol!.targetView, fromVCView: fromView!, toVCView: toView!)
+                targetView.transform = self.transformForwaradTargetView(fromTargetView: fromVCProtocol!.targetView, toTargetView: toVCProtocol!.targetView, fromVCView: fromView!, toVCView: toView!)
+                
+                UIView.setAnimationCurve(.easeOut)
                 
                 UIView.animate(withDuration: 0.3, animations: {
                     targetView.transform = CGAffineTransform.identity
                 }, completion: { (finished) in
-                    
+                    self.toVCProtocol?.pushAnimationEnded()
                 })
             }
         }
@@ -262,17 +266,6 @@ extension CustomPrecentDrivenInteractiveTransition: UIViewControllerAnimatedTran
 extension CustomPrecentDrivenInteractiveTransition {
     // 拡大と移動 ターゲットView
     func transformForwaradTargetView(fromTargetView:UIView, toTargetView:UIView, fromVCView:UIView, toVCView:UIView) -> CGAffineTransform {
-        let toTargetFrame = toVCView.convert(toTargetView.frame, to: toVCView)
-        let fromTargetFrame = fromVCView.convert(fromTargetView.frame, to: toVCView)
-
-        let scaleX = toTargetFrame.width/fromTargetFrame.width
-        let scaleY = toTargetFrame.height/fromTargetFrame.height
-        
-        return CGAffineTransform(a: scaleX, b: 0, c: 0, d: scaleY, tx: toTargetFrame.center.x - fromTargetFrame.center.x, ty: toTargetFrame.center.y - fromTargetFrame.center.y)
-    }
-    
-    // 拡大と移動 ターゲットView
-    func transformForwaradTargetView2(fromTargetView:UIView, toTargetView:UIView, fromVCView:UIView, toVCView:UIView) -> CGAffineTransform {
         let toTargetFrame = toVCView.convert(toTargetView.frame, to: toVCView)
         let fromTargetFrame = fromVCView.convert(fromTargetView.frame, to: toVCView)
         
@@ -307,6 +300,8 @@ protocol TransitioinAnimationTargetViewControllerProtocol {
     
     func clearBack()
     func resetBack()
+    func pushAnimationEnded()
+    func popAnimationEnded()
 }
 
 extension CGRect {
